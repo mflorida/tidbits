@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+jspm_packages/
+
+# IDEs
+.idea
+*.iml
+.vscode
+
+# dotenv environment variables file
+.env
+.env.test

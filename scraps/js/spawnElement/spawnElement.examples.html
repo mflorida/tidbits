@@ -1,0 +1,49 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>spawnElement.js</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        #page-wrapper {
+            width: 800px;
+            margin: 0 auto;
+        }
+
+        #page-wrapper > .pad {
+            padding: 20px;
+        }
+    </style>
+    <script src="spawnElement.class.js"></script>
+</head>
+<body>
+<div id="page-wrapper">
+    <div class="pad">
+        <div id="spawn">
+            <!--  Elements spawned here  -->
+        </div>
+        <div id="frags">
+
+        </div>
+    </div>
+</div>
+<script src="spawnElement.examples.js"></script>
+<script>
+  (function(window) {
+    console.log('html spawning');
+    const spawnContainer = document.getElementById('spawn');
+    window.spawnFrags(spawnContainer);
+
+    const frags = window.spawnElement('', { text: 'Fragmented' });
+    frags.render(document.getElementById('frags'));
+
+  })(window);
+</script>
+</body>
+</html>

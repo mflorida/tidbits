@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>x0 Examples</title>
+</head>
+
+<script src="https://code.jquery.com/jquery-3.4.1.js"
+        integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+        crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"
+        integrity="sha256-VeNaFBVDhoX3H+gJ37DpT/nTuZTdjYro9yBruHjVmoQ="
+        crossorigin="anonymous"></script>
+
+<script defer type="module" src="index.js"></script>
+<body>
+
+<div id="body-content">
+
+  <header class="header" data-your-stuff="my-stuff">
+    <h1 class="h1"></h1>
+  </header>
+
+  <hr>
+
+  <div class="hipsum-html"></div>
+  <div class="hipsum-html"></div>
+  <div class="hipsum-html"></div>
+
+  <p id="hipsum-text" data-hipsum-text></p>
+
+  <p class="filler"></p>
+  <p class="filler"></p>
+  <p class="filler"></p>
+
+  <div data-more-filler>
+    <!-- 5 filler paragraphs will be generated here -->
+  </div>
+
+  <input data-foo="bar" type="hidden" name="hidden-input" value="this is hidden">
+
+  <hr>
+
+  <footer class="footer">
+    <small id="footer-text"></small>
+  </footer>
+
+</div>
+<!-- /#body-content -->
+
+</body>
+</html>

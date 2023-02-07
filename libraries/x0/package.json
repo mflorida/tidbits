@@ -1,0 +1,17 @@
+{
+  "name": "x0",
+  "version": "0.1.2",
+  "description": "Legacy JavaScript library",
+  "author": "Mark M. Florida",
+  "license": "UNLICENSED",
+  "main": "main.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev:js": "scripts/dev.sh",
+    "build:js": "scripts/build.sh",
+    "test": "echo \"No tests yet\""
+  },
+  "devDependencies": {
+    "esbuild": "^0.17.5"
+  }
+}

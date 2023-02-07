@@ -1,0 +1,22 @@
+{
+  "name": "tidbits",
+  "version": "0.0.0",
+  "description": "Random miscellaneous codes",
+  "author": "Mark M. Florida",
+  "license": "UNLICENSED",
+  "homepage": "https://github.com/mflorida/tidbits#readme",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mflorida/tidbits.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mflorida/tidbits/issues"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  }
+}

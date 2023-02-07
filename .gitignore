@@ -10,3 +10,6 @@ jspm_packages/
 # dotenv environment variables file
 .env
 .env.test
+
+# misc. files to ignore
+*-----*

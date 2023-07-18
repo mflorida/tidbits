@@ -42,29 +42,36 @@
 
     spawned.element = element;
     spawned.spawned = element;
+
     spawned.get = (fn) => {
       if (isFunction(fn)) {
         fn.call(spawned, element);
       }
       return element;
     };
+
     spawned.outerHTML = () => {
       return element.outerHTML;
     };
+
     spawned.clone = () => element.cloneNode(true);
+
     spawned.children = () => {
       return [].slice.call(element.children);
     };
+
     spawned.append = (content) => {
       [].concat(content).forEach((item) => {
         appendItem(element, item, spawnElement);
       });
       return spawned;
     };
+
     spawned.render = (parent) => {
       parentContext(parent).appendChild(element);
       return spawned;
     };
+    spawned.appendTo = spawned.render;
 
 
     // config params that can be used in `opts`

@@ -152,6 +152,20 @@
       return this;
     }
 
+    on(listeners) {
+      const el = this.element;
+      if (Array.isArray(listeners)) {
+        listeners.forEach((listener) => {
+          el.addEventListener(...listener);
+        });
+      } else {
+        for (const [type, args] of Object.entries(listeners)) {
+          el.addEventListener(...[].concat(type, args));
+        }
+      }
+      return this;
+    }
+
     text(content) {
       if (stringable(content)) {
         this.element.textContent = (content + '');
@@ -222,6 +236,8 @@
       this.element.id = id;
     }
 
+    id = this.setId;
+
     // properties that can be used for 'opts' argument
     setOpts(self) {
       const opts = {
@@ -241,7 +257,8 @@
         children: self.appendChildren,
         classes: self.classes,
         className: self.classes,
-        id: self.setId
+        id: self.setId,
+        on: self.on
       };
       opts.innerHTML = opts.html;
       return opts;

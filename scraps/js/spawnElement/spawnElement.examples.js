@@ -34,34 +34,45 @@
     data: { fooBar: 'baz' },
     html: '<hr>',
     innerHTML: '<i>inner</i>',
-    on: [
-      ['click', (e) => {
+    on: {
+      click: [(e) => {
+        const elem = e.target;
         e.stopImmediatePropagation();
-        const div = e.target;
-        div.style.color = '#' + randomHex();
-        div.style.background = '#' + randomHex();
+        console.log(elem.tagName);
+        elem.style.color = '#' + randomHex();
+        elem.style.background = '#' + randomHex();
       }]
-    ]
+    }
   }, [
     ['hr'],
     [`p#foo.bar.baz|title="It's the Foo"`, null, [
       `I'm a paragraph.`,
       ['br'],
       ['small.tiny', null, `And I'm small.`],
-      '&nbsp;&nbsp;',
-      ['button.btn', {
-        prop: { title: 'Bogus' },
+      '<!-- double <br> elements as HTML string: -->',
+      `<br><br>`,
+      ['button.btn|type=button', {
+        prop: {
+          title: (() => {
+            console.log('button title');
+            return 'Bogus';
+          })()
+        },
         on: [
           ['click', (e) => {
-            console.log('click', e);
+            console.log('click 1', e.target.tagName);
+            document.body.style.color = '#' + randomHex();
+          }],
+          ['click', (e) => {
+            console.log('click 2', e.target.tagName);
             e.target.style.color = '#' + randomHex();
           }],
           ['mouseover', (e) => {
-            console.log('mouseover', e);
-            e.target.style.background = '#' + randomHex();
+            console.log('mouseover', e.target.tagName);
+            document.body.style.background = '#' + randomHex();
           }],
           ['mouseout', (e) => {
-            console.log('mouseout', e);
+            console.log('mouseout', e.target.tagName);
           }]
         ]
       }, 'Click Me']
@@ -70,11 +81,18 @@
 
   const spawned = spawnElement(nestedElements);
   const cloned = spawned.clone();
+
   spawned.render(spawnContainer);
 
+  spawnElement('br').render(spawnContainer);
+
   spawnElement('p')
-    .append([cloned, '<pre>(cloned)</pre>'])
     .append([
+      '<pre>cloned: </pre>',
+      cloned
+    ])
+    .append([
+      ['br'],
       ['b', `That's bold.`],
       '<pre>death</pre>'
     ])

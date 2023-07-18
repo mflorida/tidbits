@@ -1,4 +1,4 @@
-(function(window) {
+((window) => {
 
   const spawnContainer = document.getElementById('spawn');
 
@@ -7,19 +7,19 @@
   }
 
   function spawnFrags(container) {
-    const frag = spawnElement('', 'I\'m in a fragment. ');
-    const fragToo = spawnElement('!', 'I\'m in a fragment too. ');
+    const frag = spawnElement('', `I'm in a fragment. `);
+    const fragToo = spawnElement('!', `I'm in a fragment too. `);
     // frag.append(fragToo.clone());
     frag.render(container);
     // fragToo.append(frag.clone());
     fragToo.render(container);
     spawnElement().append([
       ['br'],
-      ['i', { className: 'also-in-a-fragment' }, 'And I\'m also in a fragment. '],
+      ['i', { className: 'also-in-a-fragment' }, `And I'm also in a fragment. `],
       ['br']
     ]).render(container);
     console.log(container);
-    spawnElement('#', 'I\'m also in a fragment as well. ').render(container);
+    spawnElement('#', `I'm also in a fragment as well. `).render(container);
   }
 
   window.spawnFrags = spawnFrags;
@@ -44,10 +44,10 @@
     ]
   }, [
     ['hr'],
-    ['p#foo.bar.baz|title="It\'s the Foo"', null, [
-      'I\'m a paragraph.',
+    [`p#foo.bar.baz|title="It's the Foo"`, null, [
+      `I'm a paragraph.`,
       ['br'],
-      ['small.tiny', null, 'And I\'m small.'],
+      ['small.tiny', null, `And I'm small.`],
       '&nbsp;&nbsp;',
       ['button.btn', {
         prop: { title: 'Bogus' },
@@ -72,7 +72,12 @@
   const cloned = spawned.clone();
   spawned.render(spawnContainer);
 
-  spawnElement('p').append([cloned, '<pre>(cloned)</pre>']).append([['b', 'That\'s bold.'],
-    '<pre>death</pre>']).render(spawnContainer);
+  spawnElement('p')
+    .append([cloned, '<pre>(cloned)</pre>'])
+    .append([
+      ['b', `That's bold.`],
+      '<pre>death</pre>'
+    ])
+    .render(spawnContainer);
 
 })(window);

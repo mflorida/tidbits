@@ -11,5 +11,8 @@ jspm_packages/
 .env
 .env.test
 
+# macOS
+.DS_Store
+
 # misc. files to ignore
 *-----*

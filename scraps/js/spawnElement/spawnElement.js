@@ -1,14 +1,12 @@
-(function(factory){
+(function iife(factory) {
   if (typeof define === 'function' && define.amd) {
     define(factory);
-  }
-  else if (typeof exports === 'object') {
+  } else if (typeof exports === 'object') {
     module.exports = factory();
-  }
-  else {
+  } else {
     return factory();
   }
-}(function() {
+}(function factory() {
 
   /**
    * function to create old-fashioned DOM elements. What's wrong with the DOM?
@@ -44,86 +42,91 @@
 
     spawned.element = element;
     spawned.spawned = element;
+
     spawned.get = (fn) => {
       if (isFunction(fn)) {
         fn.call(spawned, element);
       }
       return element;
     };
+
     spawned.outerHTML = () => {
       return element.outerHTML;
     };
+
     spawned.clone = () => element.cloneNode(true);
+
     spawned.children = () => {
       return [].slice.call(element.children);
     };
+
     spawned.append = (content) => {
       [].concat(content).forEach((item) => {
         appendItem(element, item, spawnElement);
       });
       return spawned;
     };
+
     spawned.render = (parent) => {
       parentContext(parent).appendChild(element);
       return spawned;
     };
+    spawned.appendTo = spawned.render;
 
 
     // config params that can be used in `opts`
     const methods = {
-      id: function(id) {
+      id: function (id) {
         spawned.element.id = id;
         return spawned;
       },
-      classes: function(classNames) {
+      classes: function (classNames) {
         const el = spawned.element;
         el.className = [].concat([el.className], classNames).join(' ').replace(/\s+/, ' ').trim();
         return spawned;
       },
-      prop: function(obj) {
+      prop: function (obj) {
         const el = spawned.element;
         for (let [p, v] of Object.entries(obj)) {
           try {
             el[p] = v;
-          }
-          catch (e) {
+          } catch (e) {
             console.warn(e);
           }
         }
         return spawned;
       },
-      attr: function(obj) {
+      attr: function (obj) {
         const el = spawned.element;
         for (let [a, v] of Object.entries(obj)) {
           try {
             el.setAttribute(a, v);
-          }
-          catch (e) {
+          } catch (e) {
             console.warn(e);
           }
         }
         return spawned;
       },
-      style: function(obj) {
+      style: function (obj) {
         const el = spawned.element;
         for (let [s, v] of Object.entries(obj)) {
           el.style[s] = v;
         }
         return spawned;
       },
-      data: function(obj) {
+      data: function (obj) {
         const el = spawned.element;
         for (let [d, v] of Object.entries(obj)) {
           el.dataset[d] = v;
         }
         return spawned;
       },
-      text: function(content) {
+      text: function (content) {
         const el = spawned.element;
         el.textContent = content;
         return spawned;
       },
-      html: function(content) {
+      html: function (content) {
         const el = spawned.element;
         if (content != null) {
           el.innerHTML = content;
@@ -133,12 +136,12 @@
           return spawned.element.outerHTML;
         }
       },
-      appendElement: function(content) {
+      appendElement: function (content) {
         const el = spawned.element;
         appendItem(el, content, spawnElement);
         return spawned;
       },
-      on: function(listeners) {
+      on: function (listeners) {
         const el = spawned.element;
         console.log(arguments);
         listeners.forEach((listener) => {
@@ -147,7 +150,7 @@
         });
         return spawned;
       },
-      ___: function() { return spawned; }
+      ___: function () { return spawned; }
     };
     methods.className = methods.classes;
     methods.css = methods.style;
@@ -180,8 +183,7 @@
         if (methods.hasOwnProperty(method)) {
           try {
             methods[method].call(spawned, args);
-          }
-          catch (e) {
+          } catch (e) {
             console.warn(e);
           }
         }
@@ -194,12 +196,10 @@
       children.forEach((child) => {
         appendItem(element, child, spawnElement);
       });
-    }
-    else if (stringable(children)) {
+    } else if (stringable(children)) {
       if (isFragment(element)) {
         element.textContent += children;
-      }
-      else {
+      } else {
         element.innerHTML += children;
       }
     }
@@ -368,15 +368,12 @@
     try {
       if (stringable(item)) {
         el[isFragment(el) ? 'insertAdjacentText' : 'insertAdjacentHTML']('beforeend', item);
-      }
-      else if (appendable(item)) {
+      } else if (appendable(item)) {
         el.appendChild(item);
-      }
-      else if (Array.isArray(item)) {
+      } else if (Array.isArray(item)) {
         el.appendChild(spawnFn.apply(null, item).get());
       }
-    }
-    catch (e) {
+    } catch (e) {
       console.warn(e);
     }
   }
@@ -428,7 +425,7 @@
   Object.assign(window, {
     appendItem,
     spawnElement
-  })
+  });
 
   return spawnElement;
 

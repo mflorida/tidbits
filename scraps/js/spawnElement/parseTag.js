@@ -2,22 +2,22 @@
  * Parse a `spawnElement()` tag string and return an element
  * with the specified attributes or just a DocumentFragment.
  */
-(function(factory){
+(function iife(factory) {
   if (typeof define === 'function' && define.amd) {
     define(factory);
-  }
-  else if (typeof exports === 'object') {
+  } else if (typeof exports === 'object') {
     module.exports = factory();
-  }
-  else {
+  } else {
     return factory();
   }
-}(function() {
+}(function factory() {
 
-  return function parseTag(t) {
+  return function parseTag(t = '') {
+
+    let str = t;
 
     const tt = {
-      tag: t || '',
+      tag: '',
       attrs: [],
       id: '',
       classes: [],
@@ -26,44 +26,38 @@
 
     // does the tag string indicate a fragment?
     // fragment 'tag' would be: '<>', '</>', ''
-    if (/^(<>|<\/>)/.test(tt.tag) || tt.tag === '') {
+    if (/^(<>|<\/>)/.test(str) || str === '') {
       return document.createDocumentFragment();
     }
 
     // does the tag have attribute 'shortcuts' that can be parsed?
     // (don't try to follow this... not worth the effort)
-    if (/[#.,?|]/.test(tt.tag)) {
+    if (/[#.,?|]/.test(str)) {
 
       // split any attributes
-      tt.attrs = tt.tag.split(/[,|]/);
-
-      // shift out the tag
-      tt.tag = tt.attrs.shift();
+      [str, ...tt.attrs] = str.split(/[,|]/);
 
       // is there a 'name' shortcut?
-      [tt.tag, tt.name = ''] = tt.tag.split('?');
+      [str, tt.name] = str.split('?');
 
       // any classes?
-      tt.classes = tt.tag.split('.');
-
-      // shift out the tag again
-      tt.tag = tt.classes.shift();
+      [str, ...tt.classes] = str.split('.');
 
       // should have just tag and id (if present) remaining
-      [tt.tag, tt.id = ''] = tt.tag.split('#');
+      [tt.tag, tt.id] = str.split('#');
 
     }
 
     const element = document.createElement(tt.tag);
 
-    element.id = tt.id;
-    element.name = tt.name;
+    if (tt.id) element.id = tt.id;
+    if (tt.name) element.name = tt.name;
 
     for (const attr of tt.attrs) {
       const [name, value] = attr.trim().split('=');
       element.setAttribute(
         name.trim(),
-        value.trim().replace(/^[\s"']+|[\s"']+$/g, '')
+        value.trim().replace(/^["']|['"]$/g, '')
       );
     }
 
@@ -74,6 +68,6 @@
 
     return element;
 
-  }
+  };
 
-}))
+}));

@@ -17,6 +17,6 @@
     "url": "https://github.com/mflorida/tidbits/issues"
   },
   "devDependencies": {
-    "typescript": "^4.9.5"
+    "typescript": "^5.1.6"
   }
 }

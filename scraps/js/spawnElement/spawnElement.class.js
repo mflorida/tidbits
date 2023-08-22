@@ -1,17 +1,15 @@
 /**
  * JavaScript class-based implementation of the spawnElement() function.
  */
-(function(factory){
+(function iife(factory) {
   if (typeof define === 'function' && define.amd) {
     define(factory);
-  }
-  else if (typeof exports === 'object') {
+  } else if (typeof exports === 'object') {
     module.exports = factory();
-  }
-  else {
+  } else {
     return factory();
   }
-}(function(){
+}(function factory() {
 
   const SpawnedElement = class SpawnedElementClass {
     constructor(tag, opts, children) {
@@ -50,8 +48,7 @@
         Object.assign(this, tag, {
           element: tag.element.cloneNode(true)
         });
-      }
-      else {
+      } else {
         this.element = this.parseTag(args.tag);
       }
 
@@ -63,8 +60,7 @@
           if (this.opts.hasOwnProperty(opt)) {
             try {
               this.opts[opt].call(this, val);
-            }
-            catch (e) {
+            } catch (e) {
               console.warn(e);
             }
           }
@@ -75,12 +71,10 @@
         args.children.forEach((child) => {
           this.appendItem(this.element, child, spawnElement);
         });
-      }
-      else if (stringable(args.children)) {
+      } else if (stringable(args.children)) {
         if (isFragment(this.element)) {
           this.element.textContent += args.children;
-        }
-        else {
+        } else {
           this.element.innerHTML += args.children;
         }
       }
@@ -120,8 +114,7 @@
       for (let [p, v] of Object.entries(obj)) {
         try {
           el[p] = v;
-        }
-        catch (e) {
+        } catch (e) {
           console.warn(e);
         }
       }
@@ -133,8 +126,7 @@
       for (let [a, v] of Object.entries(obj)) {
         try {
           el.setAttribute(a, v);
-        }
-        catch (e) {
+        } catch (e) {
           console.warn(e);
         }
       }
@@ -156,6 +148,20 @@
       }
       for (let [d, v] of Object.entries(obj)) {
         el.dataset[d] = v;
+      }
+      return this;
+    }
+
+    on(listeners) {
+      const el = this.element;
+      if (Array.isArray(listeners)) {
+        listeners.forEach((listener) => {
+          el.addEventListener(...listener);
+        });
+      } else {
+        for (const [type, args] of Object.entries(listeners)) {
+          el.addEventListener(...[].concat(type, args));
+        }
       }
       return this;
     }
@@ -183,22 +189,18 @@
               opts: null,
               children: this.element.innerHTML
             };
-          }
-          catch (e) {
+          } catch (e) {
             console.warn(e);
             el.innerHTML = content;
           }
-        }
-        else {
+        } else {
           el.innerHTML = content;
         }
         return this;
-      }
-      else if (stringable(content)) {
+      } else if (stringable(content)) {
         el.innerHTML = (content + '');
         return this;
-      }
-      else if (content == null) {
+      } else if (content == null) {
         if (el.outerHTML) {
           return el.outerHTML;
         }
@@ -217,14 +219,14 @@
     classes(classNames) {
       const el = this.element;
       [].concat(classNames)
-      .join(' ')
-      .trim()
-      .split(/\s+/)
-      .forEach((className) => {
-        if (!el.classList.contains(className)) {
-          el.classList.add(className);
-        }
-      });
+        .join(' ')
+        .trim()
+        .split(/\s+/)
+        .forEach((className) => {
+          if (!el.classList.contains(className)) {
+            el.classList.add(className);
+          }
+        });
       return this;
     }
 
@@ -233,6 +235,8 @@
     setId(id) {
       this.element.id = id;
     }
+
+    id = this.setId;
 
     // properties that can be used for 'opts' argument
     setOpts(self) {
@@ -253,7 +257,8 @@
         children: self.appendChildren,
         classes: self.classes,
         className: self.classes,
-        id: self.setId
+        id: self.setId,
+        on: self.on
       };
       opts.innerHTML = opts.html;
       return opts;
@@ -343,23 +348,19 @@
       try {
         if (stringable(item)) {
           el[isFragment(el) ? 'insertAdjacentText' : 'insertAdjacentHTML']('beforeend', item);
-        }
-        else if (item instanceof SpawnedElement) {
+        } else if (item instanceof SpawnedElement) {
           el.appendChild(item.get());
-        }
-        else if (appendable(item)) {
+        } else if (appendable(item)) {
           el.appendChild(item);
-        }
-        else if (Array.isArray(item)) {
+        } else if (Array.isArray(item)) {
           el.appendChild(spawnFn.apply(null, item).get());
         }
-      }
-      catch (e) {
+      } catch (e) {
         console.warn(e);
       }
     }
 
-  }
+  };
 
 
   function spawnElement(tag, opts, children) {

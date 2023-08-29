@@ -1,0 +1,32 @@
+# Theoretical example that uses YAML to construct a DOM tree.
+# Each array element is an object with a SINGLE property containing
+# the 'parseable' tag string
+
+---
+
+# Use css selector syntax to indicate parent element to render into
+'#container':
+
+  - main.content:
+      - h2#about.text-xl.mx-2.p-4|title="About": About Us
+      - p.mx-2.p-4: Here's what we're about...
+      - ul#stuff:
+          - li: Doing cool stuff
+          - li: Doing not-so-cool stuff
+          - li: Doing terrible stuff
+
+  # DANGEROUS!!! Possibly allow strings of JavaScript code to be passed to eval()?
+  - script:
+      - ___JS___: |
+          const stuff_ = document.getElementById('stuff');
+          stuff_.style.listStyleType = 'none';
+
+  # The fragments cannot be processed by the parseTag() function
+  # But are included as an example
+  - <>:
+      - p#fragments:
+          - <>: Document fragments inside of a paragraph...
+          - <>: ...inside of other document fragments.
+      - p#more-fragments:
+          - <>: Two more fragments inside of a paragraph...
+          - <>: ...inside of other document fragments.

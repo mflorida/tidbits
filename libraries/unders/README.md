@@ -20,7 +20,7 @@ const theseThings = allTrue(
   document.body === querySelector('body'),
   queryAll('#foo-div')[0] === ___.getById('foo-div'),
   !0,
-  !!'' === false,
+  !'' === false,
   isEmpty({}),
   isEmpty(''),
   isEmpty([])

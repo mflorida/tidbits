@@ -141,6 +141,13 @@ export const voidTags = [
   'wbr'
 ] as const;
 
+export const tagList = {
+  tags,
+  voidTags,
+} as const;
+
+export type Tag = typeof tags[number];
+export type VoidTag = typeof voidTags[number];
 
 // export const tagMap = {
 //   a: HTMLAnchorElement,
@@ -315,9 +322,3 @@ export function elementEvents() {
 //   div: HTMLDivElement
 // };
 
-export const tagList = {
-  tags,
-  voidTags,
-} as const;
-
-export default tagList;

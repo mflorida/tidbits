@@ -1,9 +1,9 @@
-import yadel from './yadel';
-import { tags, voidTags } from './tags';
+import ya from './yadel';
+import { tags, voidTags } from './tagList';
 
-export default {
+export const yadelTags = {
   ...[].concat(tags, voidTags).reduce((fns, tag) => {
-    fns[tag] = (...args) => yadel(tag, ...args);
+    fns[tag] = (...args) => ya(tag, ...args);
     return fns;
   }, {})
-};
+} as const;

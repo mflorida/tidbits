@@ -1,12 +1,13 @@
 /**
- * List of element tagNames and types
+ * Element tagNames and types
  */
-import tagList from './tagList'
+// import { tagList } from './tagList'
 
-export const { tags, voidTags } = tagList;
-export type Tag = typeof tags[number];
-export type VoidTag = typeof voidTags[number];
+// export const { tags, voidTags } = tagList;
+// export type Tag = typeof tags[number];
+// export type VoidTag = typeof voidTags[number];
 
+// TODO: Do something with the code below
 
 // export type TagMap<N> = [...Object.entries(tagMap)] as const;
 

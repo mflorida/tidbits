@@ -165,6 +165,10 @@
     }
     x0.isString = isString;
 
+    function isEmptyString(it) {
+        return isString(it) && it === '';
+    }
+    x0.isEmptyString = isEmptyString;
 
     function stringable(val){
         return /^(string|number|boolean)$/i.test(typeof val);
@@ -274,29 +278,44 @@
     x0.isEmptyArray = isEmptyArray;
 
 
-    function isEmpty(x, args){
-        if (isArray(x)) {
-            return !x.length;
-        }
-        if (isPlainObject(x)) {
-            return isEmptyObject(x);
-        }
-        if (isString(x)) {
-            return x === '';
-        }
-        if (typeof x === 'boolean') {
-            return false;
-        }
-        if (isNumeric(x)) {
-            return false;
-        }
-        // does a function return an 'empty' value?
-        if (isFunction(x)) {
-            return isEmpty(x.apply(null, [].concat(args)));
-        }
-        return (x === null || isUndefined(x) || !isFunction(x));
+    function isEmpty(it) {
+        return (''
+          // || it == null
+          || isUndefined(it)
+          || isEmptyArray(it)
+          || isEmptyObject(it)
+          || isEmptyString(it)
+          || !isBoolean(it)
+          || !isNumeric(it)
+          || !isFunction(it)
+        )
     }
     x0.isEmpty = isEmpty;
+
+
+    // function isEmptyX(x, args){
+    //     if (isArray(x)) {
+    //         return !x.length;
+    //     }
+    //     if (isPlainObject(x)) {
+    //         return isEmptyObject(x);
+    //     }
+    //     if (isString(x)) {
+    //         return x === '';
+    //     }
+    //     if (typeof x === 'boolean') {
+    //         return false;
+    //     }
+    //     if (isNumeric(x)) {
+    //         return false;
+    //     }
+    //     // does a function return an 'empty' value?
+    //     if (isFunction(x)) {
+    //         return isEmpty(x.apply(null, [].concat(args)));
+    //     }
+    //     return (x === null || isUndefined(x) || !isFunction(x));
+    // }
+    // x0.isEmptyX = isEmptyX;
 
 
     function inArray(arr, it){

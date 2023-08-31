@@ -6,6 +6,7 @@ export default (async function(){
   await import('./x0.spawnHTML.js');
   await import('./x0.spawnXML.js');
   await import('./x0.hipsum.js');
+  await import('./x0.selectors.js');
 
   console.log('index.js');
 

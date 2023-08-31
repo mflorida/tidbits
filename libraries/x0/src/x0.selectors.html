@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>x0 selectors</title>
+</head>
+<body>
+<div id="body-content">
+    <header class="header" data-your-stuff="my-stuff">
+        <h1 class="h1">Cray-cray Viral Tweet Hashtag</h1>
+    </header>
+    <hr>
+    <div class="hipsum-html">
+        <p class="hipsum">
+            Scenester cold-pressed food truck sriracha master cleanse tofu
+            post-ironic skateboard. Cassette tousled blog occupy raw. Single-origin
+            tofu jean shorts health small batch.</p>
+        <p class="hipsum">
+            Messenger bag Austin gastropub cray-cray gastropub. DIY street art 90s ethical art party. Keytar migas
+            post-ironic crucifix master cleanse blog four dollar toast chillwave? </p>
+        <p class="hipsum">
+            Narwhal VHS street art raw art party cassette roof party. Skateboard single-origin hashtag trust fund
+            mumblecore salvia. </p>
+    </div>
+    <div class="hipsum-html">
+        <p class="hipsum">
+            Mumblecore pickled gluten-free 90s actually gluten-free art organic
+            street art. Selfies yr mixtape bitters viral art crucifix occupy DIY organic banh mi! Typewriter goth synth
+            craft beer banh mi. Vinyl tweet vegan raw vegan post-ironic. Goth farm-to-table fingerstache farm-to-table
+            disrupt post-ironic. Tousled scenester listicle four dollar toast synth. </p>
+        <p class="hipsum">
+            Chillwave meggings cred single-origin keytar locavore art hella. Denim tweet food truck
+            single-origin crucifix beard oil mumblecore. Pickled mumblecore sriracha vinyl actually blog. Vinyl yr
+            mixtape listicle hella art party roof party. </p>
+        <p class="hipsum">
+            Whatever stumptown ethical synth selfies cassette whatever 90s organic art party. Organic tofu
+            paleo tousled hashtag. Millenial blog vinyl street yr mixtape flexitarian chillwave organic.
+            Hashtag selfies VHS viral coffee. Truffaut mustache sriracha tweet farm-to-table. Skateboard cred banjo
+            health master cleanse. </p>
+    </div>
+    <div class="hipsum-html">
+        <p class="hipsum">
+            Banh mi keytar chillwave master cleanse typewriter? Post-ironic listicle hella meggings art party. </p>
+        <p class="hipsum">
+            Roof party mustache butcher tote bag next level readymade narwhal banjo narwhal banjo. Keytar
+            readymade disrupt locavore scenester cold-pressed tweet tousled. Farm-to-table stumptown
+            skateboard actually flannel. Post-ironic millenial whatever keytar 90s meggings.</p>
+        <p class="hipsum">
+            Next level cred denim viral master cleanse trust fund paleo. Street 8-bit skateboard
+            flexitarian cold-pressed. </p>
+    </div>
+
+    <p data-hipsum-text="" id="hipsum-text">
+        YOLO trust fund semiotics Austin keytar trust fund street denim paleo fingerstache narwhal.</p>
+    <p class="hipsum filler">
+        90s health gastropub flexitarian DIY organic beard oil narwhal locavore locavore vinyl.</p>
+    <p class="hipsum filler">
+        Cray-cray chillwave raw keytar roof party salvia tweet gluten-free tofu whatever?</p>
+    <p class="hipsum filler">
+        Scenester craft beer roof party goth post-ironic jean shorts selfies butcher food truck blog lomo vinyl
+        organic.</p>
+
+    <div data-more-filler="">
+        <!-- 5 filler paragraphs will be generated here -->
+        <p class="hipsum filler">
+            Chillwave master cleanse Austin paleo street art YOLO polaroid tweet viral? </p>
+        <p class="hipsum filler">
+            Goth messenger bag flexitarian tweet chillwave retro Austin viral banjo! </p>
+        <p class="hipsum filler">
+            Food truck YOLO post-ironic mustache meggings food truck tousled synth actually gastropub coffee. </p>
+        <p class="hipsum filler">
+            Health flannel fixie messenger bag YOLO actually tousled tousled vinyl.</p>
+        <p class="hipsum filler">
+            Cassette 90s synth readymade cray-cray yr mixtape street coffee migas!</p>
+    </div>
+
+    <input data-foo="bar" name="hidden-input" type="hidden" value="this is hidden">
+
+    <hr>
+
+    <footer class="footer">
+        <small id="footer-text">
+            Mustache street master cleanse paleo chillwave pickled next level?
+            Health tousled cassette hella scenester!
+        </small>
+    </footer>
+</div>
+<div id="foo">
+    <p class="bar">
+        <b data-baz>
+            <!-- nothing -->
+        </b>
+    </p>
+</div>
+<script src="x0.selectors.js"></script>
+<script>
+  // Do your part to stop scope leakage!
+  (() => {
+    const _$ = locash;
+
+    // Possible format for speedy selector syntax
+    // _$('|# foo; |. bar baz; |@ data-baz;');
+    // same as:
+    _$('#foo').find('.bar').find('[data-baz]')
+
+    const _filler = document.getElementsByClassName('filler');
+
+    function locash(value, ...args) {
+      // do some things
+      const selected = document.querySelector(value);
+      return {
+        selected,
+        find: (selector) => selected.querySelector
+      };
+    }
+
+
+
+  })();
+</script>
+</body>
+</html>

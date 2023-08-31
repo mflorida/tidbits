@@ -74,18 +74,18 @@
     spawned.appendTo = spawned.render;
 
 
-    // config params that can be used in `opts`
+    // methods for config params that can be used in `opts`
     const methods = {
-      id: function (id) {
+      id: (id) => {
         spawned.element.id = id;
         return spawned;
       },
-      classes: function (classNames) {
+      classes: (classNames) => {
         const el = spawned.element;
         el.className = [].concat([el.className], classNames).join(' ').replace(/\s+/, ' ').trim();
         return spawned;
       },
-      prop: function (obj) {
+      prop: (obj) => {
         const el = spawned.element;
         for (let [p, v] of Object.entries(obj)) {
           try {
@@ -96,7 +96,7 @@
         }
         return spawned;
       },
-      attr: function (obj) {
+      attr: (obj) => {
         const el = spawned.element;
         for (let [a, v] of Object.entries(obj)) {
           try {
@@ -107,26 +107,26 @@
         }
         return spawned;
       },
-      style: function (obj) {
+      style: (obj) => {
         const el = spawned.element;
         for (let [s, v] of Object.entries(obj)) {
           el.style[s] = v;
         }
         return spawned;
       },
-      data: function (obj) {
+      data: (obj) => {
         const el = spawned.element;
         for (let [d, v] of Object.entries(obj)) {
           el.dataset[d] = v;
         }
         return spawned;
       },
-      text: function (content) {
+      text: (content) => {
         const el = spawned.element;
         el.textContent = content;
         return spawned;
       },
-      html: function (content) {
+      html: (content) => {
         const el = spawned.element;
         if (content != null) {
           el.innerHTML = content;
@@ -136,12 +136,12 @@
           return spawned.element.outerHTML;
         }
       },
-      appendElement: function (content) {
+      appendElement: (content) => {
         const el = spawned.element;
         appendItem(el, content, spawnElement);
         return spawned;
       },
-      on: function (listeners) {
+      on: (listeners) => {
         const el = spawned.element;
         if (Array.isArray(listeners)) {
           listeners.forEach((listener) => {
@@ -306,7 +306,7 @@
   // --> <tag id="id" class="class1 class2" attr="value"></tag>
   // spawnElement('input#username|name=username|data-validate=alphanum:strict|title=Username is required|required')
   // spaces can be used between attributes for legibility (pipe required as a delimiter)
-  // spawnElement('input #username | name=username | data-validate=alphanum:strict | title=Username is required | required')
+  // spawnElement('input#username | name=username | data-validate=alphanum:strict | title=Username is required | required')
   // --> <input id="username" name="username" data-validate="alphanum:strict" title="Username is required" required>
   // data can be dynamically inserted using mustache-style syntax with custom modifiers
   // spawnElement('input#ur-info|value={{https://server.net/ur/info}}')
@@ -356,15 +356,15 @@
         }]
       ]
     }, [
-      ['input.username?username|value=$.username|@validate=format:email'],
-      ['input.email?email|value=$.email'],
+      ['input:text.username?username|value=$.username|@validate=format:email'],
+      ['input:text.email?email|value=$.email'],
       ['div.profile-data', ['$.profile'].map((profile) => {
         return ['p.user-profile', [
           ['!', profile.pets.map((pet) => {
             const { name, type } = pet;
             return ['!', [
-              ['input?pets[].name', { value: name }],
-              ['input?pets[].type', { value: type }]
+              ['input:text?pets[].name', { value: name }],
+              ['input:text?pets[].type', { value: type }]
             ]];
           })]
         ]];

@@ -18,9 +18,11 @@
 
     const tt = {
       tag: '',
-      attrs: [],
       id: '',
       classes: [],
+      className: '',
+      attr: {},
+      attrs: [],
       name: ''
     };
 
@@ -48,25 +50,26 @@
 
     }
 
-    const element = document.createElement(tt.tag);
+    // const element = document.createElement(tt.tag);
 
-    if (tt.id) element.id = tt.id;
-    if (tt.name) element.name = tt.name;
+    // if (tt.id) element.id = tt.id;
+    // if (tt.name) element.name = tt.name;
 
     for (const attr of tt.attrs) {
-      const [name, value] = attr.trim().split('=');
-      element.setAttribute(
-        name.trim(),
-        value.trim().replace(/^["']|['"]$/g, '')
-      );
+      const [name, value] = attr.split('=');
+      tt.attr[name] = value;
+      // element.setAttribute(
+      //   name.trim(),
+      //   value.replace(/^["']|['"]$/g, '')
+      // );
     }
 
-    element.className = [...new Set([
-      ...element.className.trim().split(/\s+/),
+    tt.className = [...new Set([
+      // ...element.className.trim().split(/\s+/),
       ...tt.classes
     ])].join(' ').trim();
 
-    return element;
+    return tt;
 
   };
 

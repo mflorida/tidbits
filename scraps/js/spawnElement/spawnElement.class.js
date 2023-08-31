@@ -13,7 +13,6 @@
 
   const SpawnedElement = class SpawnedElementClass {
     constructor(tag, opts, children) {
-
       const args = {
         tag: tag,
         opts: opts,
@@ -78,7 +77,6 @@
           this.element.innerHTML += args.children;
         }
       }
-
     }
 
     // end constructor()
@@ -134,33 +132,30 @@
     }
 
     css(obj) {
-      const el = this.element;
       for (let [s, v] of Object.entries(obj)) {
-        el.style[s] = v;
+        this.element.style[s] = v;
       }
       return this;
     }
 
     data(obj) {
-      const el = this.element;
       if (obj == null) {
-        return el.dataset;
+        return this.element.dataset;
       }
       for (let [d, v] of Object.entries(obj)) {
-        el.dataset[d] = v;
+        this.element.dataset[d] = v;
       }
       return this;
     }
 
-    on(listeners) {
-      const el = this.element;
+    on(listeners, child) {
       if (Array.isArray(listeners)) {
         listeners.forEach((listener) => {
-          el.addEventListener(...listener);
+          this.element.addEventListener(...listener);
         });
       } else {
         for (const [type, args] of Object.entries(listeners)) {
-          el.addEventListener(...[].concat(type, args));
+          this.element.addEventListener(...[].concat(type, args));
         }
       }
       return this;
@@ -173,7 +168,7 @@
       return this;
     }
 
-    replace(content) {
+    html(content) {
       const el = this.element;
       if (probablyHTML(content)) {
         const parentElement = this.element.parentElement;
@@ -206,7 +201,8 @@
         }
       }
     }
-    html = this.replace;
+    // - alias - //
+    replace = this.html;
 
     appendChildren(children) {
       const el = this.element;
@@ -229,13 +225,13 @@
         });
       return this;
     }
-
+    // - alias - //
     addClass = this.classes;
 
     setId(id) {
       this.element.id = id;
     }
-
+    // - alias - //
     id = this.setId;
 
     // properties that can be used for 'opts' argument
@@ -264,10 +260,15 @@
       return opts;
     }
 
-    render(parent) {
-      parentContext(parent).appendChild(this.element);
+    render(parent, replace = true) {
+      parentContext(parent)[replace ? 'replaceChildren' : 'appendChild'](this.element);
       return this;
     };
+
+    appendTo(parent) {
+      parentContext(parent).appendChild(this.element);
+      return this;
+    }
 
     parseTag(t) {
 
@@ -410,7 +411,7 @@
   }
 
   function probablyHTML(it) {
-    return isString(it) && it.trim().charAt(0) === '<';
+    return isString(it) && it.trim()[0] === '<';
   }
 
   function firstDefined(a, b, c, etc) {

@@ -2,6 +2,7 @@
  * Standard and void HTML tags
  */
 
+// Standard HTML tags, lowercase, in alphabetical order
 export const tags = [
   'a',
   'abbr',
@@ -10,6 +11,7 @@ export const tags = [
   'article',
   'aside',
   'audio',
+
   'b',
   'base',
   'bdi',
@@ -18,12 +20,14 @@ export const tags = [
   'body',
   'br',
   'button',
+
   'canvas',
   'caption',
   'cite',
   'code',
   'col',
   'colgroup',
+
   'data',
   'datalist',
   'dd',
@@ -34,13 +38,16 @@ export const tags = [
   'div',
   'dl',
   'dt',
+
   'em',
   'embed',
+
   'fieldset',
   'figcaption',
   'figure',
   'footer',
   'form',
+
   'h1',
   'h2',
   'h3',
@@ -51,17 +58,21 @@ export const tags = [
   'header',
   'hgroup',
   'hr',
-  // 'html',
+  'html',
+
   'i',
   'iframe',
   'img',
   'input',
   'ins',
+
   'kbd',
+
   'label',
   'legend',
   'li',
   'link',
+
   'main',
   'map',
   'mark',
@@ -70,24 +81,30 @@ export const tags = [
   'menuitem',
   'meta',
   'meter',
+
   'nav',
   'noscript',
+
   'object',
   'ol',
   'optgroup',
   'option',
   'output',
+
   'p',
   'param',
   'picture',
   'pre',
   'progress',
+
   'q',
+
   'rb',
   'rp',
   'rt',
   'rtc',
   'ruby',
+
   's',
   'samp',
   'script',
@@ -104,6 +121,7 @@ export const tags = [
   'summary',
   'sup',
   'svg',
+
   'table',
   'tbody',
   'td',
@@ -116,10 +134,13 @@ export const tags = [
   'title',
   'tr',
   'track',
+
   'u',
   'ul',
+
   'var',
   'video',
+
   'wbr'
 ] as const;
 
@@ -141,13 +162,12 @@ export const voidTags = [
   'wbr'
 ] as const;
 
+export const tagList = {
+  tags,
+  voidTags,
+} as const;
 
-// export const tagMap = {
-//   a: HTMLAnchorElement,
-//   b: HTMLElement,
-//   p: HTMLParagraphElement,
-//   div: HTMLDivElement
-// };
+export default tagList;
 
 // List of event types as reported by Firefox
 export const eventTypes = [
@@ -254,45 +274,51 @@ export const eventTypes = [
   'error'
 ] as const;
 
+export const allTags = [].concat(
+  'custom-element',
+  'yadel-element',
+  tags,
+  voidTags
+);
 
-// Build list events for each tag type
-export function elementEvents() {
-  const regex_on = /^on/i;
-  const allTags = [].concat('custom-element', tags, voidTags);
+const regex_on = /^on/i;
 
-  const eventMap = {
-    $all: [],
-    document: [],
-    window: [],
-    ...allTags.reduce((out, tag) => {
-      out[tag] = [];
-      return out;
-    }, {})
-  };
+const eventMap = {
+  $all: {},
+  document: [],
+  window: [],
+  ...allTags.reduce((out, tag) => {
+    out[tag] = [];
+    return out;
+  }, {})
+};
 
-  const eventTags = {};
+const eventTags = {};
 
-  const tagCount = Object.keys(eventMap).length;
+function processEventMap(element, tagName) {
+  for (const property in element) {
+    if (regex_on.test(property)) {
+      const evtName = property.replace(regex_on, '');
 
-  function processEventMap(what, label) {
-    for (const property in what) {
-      if (regex_on.test(property)) {
-        const evtName = property.replace(regex_on, '');
+      eventTags[evtName] = [].concat(eventTags[evtName] || [], tagName);
+      eventTags[evtName].sort();
 
-        eventTags[evtName] = [].concat(eventTags[evtName] || [], label);
-        eventTags[evtName].sort();
+      eventMap[tagName] = [].concat(eventMap[tagName] || [], evtName);
+      eventMap[tagName].sort();
 
-        eventMap[label] = [].concat(eventMap[label] || [], evtName);
-        eventMap[label].sort();
-
-        // Count the things
-        eventMap.$all[evtName] =
-          eventMap.$all[evtName]
-            ? eventMap.$all[evtName] += 1
-            : 1;
+      // Map elements to event types
+      if (eventMap.$all[evtName]) {
+        eventMap.$all[evtName].push(tagName);
+      } else {
+        eventMap.$all[evtName] = [tagName];
       }
     }
   }
+}
+
+// Build list events for each tag type
+export function elementEvents() {
+  // const tagCount = Object.keys(eventMap).length;
 
   processEventMap(document, 'document');
   processEventMap(window, 'window');
@@ -301,9 +327,11 @@ export function elementEvents() {
     processEventMap(document.createElement(tag), tag);
   }
 
-  console.log('tagCount', tagCount - 3);
-  console.log('eventMap', eventMap);
-  console.log('eventTags', eventTags);
+  // console.log('tagCount', tagCount - 3);
+  // console.log('eventMap', eventMap);
+  // console.log('eventTags', eventTags);
+
+  console.log(eventMap);
 
   return eventMap;
 }
@@ -315,9 +343,3 @@ export function elementEvents() {
 //   div: HTMLDivElement
 // };
 
-export const tagList = {
-  tags,
-  voidTags,
-} as const;
-
-export default tagList;

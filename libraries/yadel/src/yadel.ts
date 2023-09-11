@@ -1,25 +1,25 @@
 // Yet Another DOM Element Library
-//
 import type { AnyFn, AnyObject, Appendable, VoidFn } from './utils';
-import { removeChildren, appendable } from './utils';
+import { appendable, removeChildren } from './utils';
 import type { Tag, VoidTag } from './tags';
-import { tags, voidTags, eventTypes } from './tagList';
+import { eventTypes, tags, voidTags } from './tagList';
 
-type Children =
+type YadelChildren =
   | Element
+  | HTMLElement
   | DocumentFragment
   | string
   | number
   | Yadel
-  | Array<YadelArgs | Children>
+  | Array<YadelArgs | YadelChildren>
 
 type TagArg = Tag | VoidTag | Array<YadelArgs>;
-type OptsArg = AnyObject | Children;
+type OptsArg = AnyObject | YadelChildren;
 
 type YadelArgs = [
   TagArg,
   OptsArg?,
-  Children?
+  YadelChildren?
 ]
 
 type ElementAttributes = {
@@ -54,8 +54,19 @@ type EventItem = [
 
 type EventList = Array<EventItem>;
 
-export const HTML_PREFIX = '__HTML__';
-const regex_HTML_PREFIX = new RegExp(`^${HTML_PREFIX}`);
+export const ___HTML = '___HTML';
+export const ___FRAG = '<>';
+
+const regex___HTML = new RegExp(`^${___HTML}`);
+const regex___FRAG = new RegExp(`^(${___FRAG}|</>)`);
+
+export const asHtml = (str) => (
+  ___HTML + str.replace(regex___HTML, '')
+);
+
+export const asFragment = (str) => (
+  ___FRAG + str.replace(regex___FRAG, '')
+);
 
 const YADEL_TAG = 'yadel-element';
 
@@ -89,11 +100,20 @@ type InsertLoc = typeof insertLoc[number]
 export class Yadel {
   tag: TagArg;
   opts: OptsArg;
-  children: Children;
+  children: YadelChildren;
   parent: Element | DocumentFragment;
 
   element: HTMLElement | Element | null = null;
   fragment: DocumentFragment | null = null;
+
+  // yadel: Yadel;
+
+  static createFragment(tag: string | null | undefined) {
+    if (tag == null || regex___FRAG.test(tag)) {
+      return document.createDocumentFragment();
+    }
+    return null;
+  }
 
   static createElement(tag: TagArg): Element {
     try {
@@ -115,15 +135,10 @@ export class Yadel {
     return document.createElement(YADEL_TAG);
   }
 
-  static createFragment(): DocumentFragment {
-    return document.createDocumentFragment();
-  }
-
   constructor(...args: YadelArgs) {
     [this.tag, this.opts, this.children] = args;
-    if (!this.tag) {
-      this.fragment = Yadel.createFragment();
-    } else {
+    this.fragment = Yadel.createFragment(this.tag as string);
+    if (!this.fragment) {
       this.element = (
         [].concat(tags, voidTags).includes(this.tag)
           ? Yadel.createElement(this.tag as TagArg)
@@ -132,8 +147,42 @@ export class Yadel {
     }
   }
 
+  static create(...args: YadelArgs) {
+    let [
+      tag = YADEL_TAG,
+      opts = {},
+      children = null
+    ] = [].concat(args);
+
+    // Create Yadel instance
+    const yadel = new Yadel(tag);
+
+    // Handle passing only two arguments (tag, appendable)
+    if (children == null && (Array.isArray(opts) || appendable(opts))) {
+      children = opts;
+      opts = {};
+    }
+
+    // iterate `opts` to do things
+    for (const [method, value] of Object.entries(opts)) {
+      if (method in yadel) {
+        yadel[method].apply(yadel, [].concat(value));
+      }
+    }
+
+    // Deal with the children!
+    for (const child of [].concat(children)) {
+      yadel.append(child, Yadel.create);
+    }
+
+    // BAD IDEA - CIRCULAR REFERENCE
+    // yadel.yadel = yadel;
+
+    return yadel;
+  }
+
   // Fire callback *only* `if` is instance of `what`
-  exec(it = this.element, what, callback, message = 'Warning...') {
+  exec(it = this.element, what, callback, warning = 'Warning...') {
     if (what == null || callback == null) {
       return false;
     }
@@ -142,7 +191,7 @@ export class Yadel {
         callback(it);
         return true;
       } catch (e) {
-        console.warn(message, '\n', e);
+        console.warn(warning, '\n', e);
         return false;
       }
     } else {
@@ -274,7 +323,7 @@ export class Yadel {
     return this;
   }
 
-  html(htm: string | number | undefined | AnyFn) {
+  [___HTML](htm: string | number | undefined | AnyFn) {
     if (/string|number/.test(typeof htm)) {
       this.element.innerHTML = String(htm);
       return this;
@@ -286,6 +335,24 @@ export class Yadel {
     this.element.innerHTML = String(this.#asValue(htm));
     return this;
   }
+  html = this[___HTML];
+
+  [___FRAG](frag: string | Node) {
+    try {
+      if (typeof frag === 'string') {
+        this.element.textContent = frag;
+        return this;
+      }
+      if (frag.nodeType && frag.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+        (this.fragment || this.element).replaceChildren(frag);
+        return this;
+      }
+    } catch (e) {
+      console.warn(`Could not process fragment.`, e);
+    }
+    return this;
+  }
+  frag = this[___FRAG];
 
   // Shortcuts for common attributes
   text(txt: string | number | undefined | AnyFn) {
@@ -363,24 +430,32 @@ export class Yadel {
     this.insertText(END, txt);
     return this;
   }
+  appendFragment(...frag: Array<string | Node>) {
+    this.element.append(...frag);
+    return this;
+  }
   // < APPEND
 
   // PREPEND >
-  // prependElement(elem: Element) {
-  //   this.insertElement(BEGIN, elem);
-  //   return this;
-  // }
+  prependElement(elem: Element) {
+    this.insertElement(BEGIN, elem);
+    return this;
+  }
   prependHTML(html: string) {
     this.insertHTML(BEGIN, html);
     return this;
   }
-  // prependText(txt: string) {
-  //   this.insertText(BEGIN, txt);
-  //   return this;
-  // }
+  prependText(txt: string) {
+    this.insertText(BEGIN, txt);
+    return this;
+  }
+  prependFragment(...frag: Array<string | Node>) {
+    this.element.prepend(...frag);
+    return this;
+  }
   // < PREPEND
 
-  appendChildren(children: Children, fn: AnyFn) {
+  append(children: YadelChildren, fn: AnyFn | undefined) {
     console.log('appendChildren');
 
     if (Array.isArray(children)) {
@@ -396,8 +471,10 @@ export class Yadel {
 
     if (/string|number/.test(typeof children)) {
       const childrenString = String(children);
-      if (regex_HTML_PREFIX.test(childrenString)) {
-        this.appendHTML(childrenString.replace(regex_HTML_PREFIX, ''));
+      if (regex___HTML.test(childrenString)) {
+        this.appendHTML(childrenString.replace(regex___HTML, ''));
+      } else if (regex___FRAG.test(childrenString)) {
+        this.appendText(childrenString.replace(regex___FRAG, ''));
       } else {
         this.appendText(childrenString);
       }
@@ -416,9 +493,9 @@ export class Yadel {
 
     return this;
   }
-  append = this.appendChildren;
+  appendChildren = this.append;
 
-  appendTo(parent: string | Element) {
+  appendTo(parent: string | Element | DocumentFragment) {
     if (typeof parent === 'string') {
       document.querySelector(parent).appendChild(this.element);
     } else {
@@ -449,7 +526,7 @@ export class Yadel {
         : appendable(target)
           ? target
           : document.body
-    ) as Appendable;
+    ) as Element | DocumentFragment;
 
     removeChildren(renderTarget);
 
@@ -458,7 +535,7 @@ export class Yadel {
       return;
     }
     if (appendable(toRender)) {
-      renderTarget.appendChild(toRender);
+      renderTarget.append(toRender);
       return;
     }
   };
@@ -466,14 +543,18 @@ export class Yadel {
   get() {
     return this.element;
   }
+
+  ya() {
+    return this.fragment || this.element;
+  }
 }
 
-// function appendChildren(yadeli: Yadel, children: Children, ya: AnyFn) {
+// function appendChildren(yadeli: Yadel, children: YadelChildren, ya: AnyFn) {
 //   console.log('appendChildren');
 //   if (/string|number/.test(typeof children)) {
 //     const childrenString = String(children).trim();
-//     if (regex_HTML_PREFIX.test(childrenString)) {
-//       yadeli.appendHTML(childrenString.replace(regex_HTML_PREFIX, ''));
+//     if (regex___HTML.test(childrenString)) {
+//       yadeli.appendHTML(childrenString.replace(regex___HTML, ''));
 //     } else {
 //       yadeli.appendText(childrenString);
 //     }
@@ -502,6 +583,7 @@ export class Yadel {
  * @param args
  */
 export function ya(...args: YadelArgs) {
+  // return Yadel.create(...args);
   let [
     tag = YADEL_TAG as TagArg,
     opts = {},
@@ -530,6 +612,9 @@ export function ya(...args: YadelArgs) {
 
   return yadel;
 }
+
+// Alias
+ya.create = Yadel.create;
 
 // Alias
 ya.render = Yadel.render;

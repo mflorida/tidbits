@@ -143,11 +143,20 @@
       },
       on: function (listeners) {
         const el = spawned.element;
-        console.log(arguments);
-        listeners.forEach((listener) => {
-          const [type, callback] = listener;
-          el.addEventListener(type, callback);
-        });
+        if (Array.isArray(listeners)) {
+          listeners.forEach((listener) => {
+            el.addEventListener(...listener);
+          });
+        } else {
+          try {
+            for (const [type, args] of Object.entries(listeners)) {
+              el.addEventListener(...[type, ...args]);
+            }
+          } catch (e) {
+            console.warn(e);
+          }
+        }
+
         return spawned;
       },
       ___: function () { return spawned; }

@@ -7,7 +7,6 @@ import { tags, voidTags, eventTypes } from './tagList';
 
 type Children =
   | Element
-  | HTMLElement
   | DocumentFragment
   | string
   | number
@@ -24,20 +23,34 @@ type YadelArgs = [
 ]
 
 type ElementAttributes = {
-  [A in string]: string | number | AnyFn | unknown
+  [a: string]: string | number | AnyFn | unknown
 }
 
 type ElementProperties = {
-  [P in string]: string | number | AnyFn | unknown
+  [p: string]: string | number | AnyFn | unknown
+}
+
+type StyleObject = {
+  [S in keyof CSSStyleDeclaration]: CSSStyleDeclaration[S]
 }
 
 type EventType = typeof eventTypes[number];
 
+// Argument types used for `addEventListener`:
+// selectedElement.addEventListener(
+//     'type': EventType,
+//     fn: VoidFn,
+//     { bubbles: true }: AnyObject
+// )
+type EventObject = {
+  [e in EventType]: VoidFn | [VoidFn, AnyObject | string]
+}
+
 type EventItem = [
   EventType,
-  (string | VoidFn),
-  (VoidFn | undefined)?
-]
+  VoidFn,
+  (AnyObject | boolean),
+] | EventObject;
 
 type EventList = Array<EventItem>;
 
@@ -53,15 +66,23 @@ class YadelElement extends HTMLElement {
   // Does this need any custom functionality?
 }
 
+const BEFORE = 'beforebegin';
+const BEGIN = 'afterbegin';
+const END = 'beforeend';
+const AFTER = 'afterend';
+
 export const INSERT = {
-  BEFORE: 'beforebegin',
-  BEGIN: 'afterbegin',
-  END: 'beforeend',
-  AFTER: 'afterend'
+  beforebegin: BEFORE,
+  afterbegin: BEGIN,
+  beforeend: END,
+  afterend: AFTER,
+  before: BEFORE,
+  prepend: BEGIN,
+  append: END,
+  after: AFTER
 } as const;
 
 const insertLoc = [...Object.values(INSERT)] as const;
-
 type InsertLoc = typeof insertLoc[number]
 
 // Yet another DOM element
@@ -71,10 +92,10 @@ export class Yadel {
   children: Children;
   parent: Element | DocumentFragment;
 
-  element: HTMLElement | Element | null;
-  // fragment: DocumentFragment | null;
+  element: HTMLElement | Element | null = null;
+  fragment: DocumentFragment | null = null;
 
-  static createElement(tag: TagArg) {
+  static createElement(tag: TagArg): Element {
     try {
       return document.createElement(tag as string);
     } catch (e) {
@@ -83,7 +104,7 @@ export class Yadel {
     return document.createElement('span');
   }
 
-  static customElement(tag: string) {
+  static customElement(tag: string): Element {
     try {
       customElements.define(tag, YadelElement);
       return document.createElement(tag);
@@ -94,16 +115,24 @@ export class Yadel {
     return document.createElement(YADEL_TAG);
   }
 
-  constructor(...args: YadelArgs) {
-    [this.tag, this.opts, this.children] = args;
-    this.element = (
-      [].concat(tags, voidTags).includes(this.tag)
-        ? Yadel.createElement(this.tag as TagArg)
-        : Yadel.customElement(this.tag as string)
-    );
+  static createFragment(): DocumentFragment {
+    return document.createDocumentFragment();
   }
 
-  // Fire callback *only* if instance of `what`
+  constructor(...args: YadelArgs) {
+    [this.tag, this.opts, this.children] = args;
+    if (!this.tag) {
+      this.fragment = Yadel.createFragment();
+    } else {
+      this.element = (
+        [].concat(tags, voidTags).includes(this.tag)
+          ? Yadel.createElement(this.tag as TagArg)
+          : Yadel.customElement(this.tag as string)
+      );
+    }
+  }
+
+  // Fire callback *only* `if` is instance of `what`
   exec(it = this.element, what, callback, message = 'Warning...') {
     if (what == null || callback == null) {
       return false;
@@ -128,71 +157,74 @@ export class Yadel {
     }
   }
 
+  #asValue(value) {
+    return (
+      typeof value === 'function'
+        ? value(this.element)
+        : value
+    );
+  }
+
   attr(obj: ElementAttributes) {
-    this.exec(this.element, Element, () => {
+    if (this.element instanceof Element) {
       for (const [name, value] of Object.entries(obj)) {
         try {
-          const attrValue = typeof value === 'function'
-            ? value(this.element)
-            : value;
-          this.element.setAttribute(name, String(attrValue));
+          this.element.setAttribute(name, String(this.#asValue(value)));
         } catch (e) {
-          console.warn(`Error setting attribute '${name}'.`);
+          console.error(`Error setting attribute '${name}' to value ${value}.\n`, e);
         }
       }
-    });
+    } else {
+      console.warn(`Can only set attributes on elements.`);
+    }
     return this;
   }
 
   prop(obj: ElementProperties) {
-    this.exec(this.element, Element, () => {
+    if (this.element instanceof Element) {
       for (const [prop, value] of Object.entries(obj)) {
         try {
-          this.element[prop] = typeof value === 'function'
-            ? value(this.element)
-            : value;
+          this.element[prop] = this.#asValue(value);
         } catch (e) {
-          console.warn(`Could not set property '${prop}' to value '${value}'.\n`, e);
+          console.error(`Error setting property '${prop}' to value '${value}'.\n`, e);
         }
       }
-    });
+    } else {
+      console.warn(`Not an Element.`, this.element);
+    }
     return this;
   }
 
   // Special handling for common attributes
   className(value: string | AnyFn) {
-    this.exec(this.element, HTMLElement, () => {
+    if (this.element instanceof HTMLElement) {
       try {
-        if (typeof value === 'function') {
-          this.element.className = value(this.element);
-        } else {
-          this.element.className = value;
-        }
+        this.element.className = this.#asValue(value);
       } catch (e) {
-        console.warn(`Could not set className to value '${value}'.\n`, e);
+        console.error(`Could not set className to value '${value}'.\n`, e);
       }
-    });
+    } else {
+      console.warn(`Not an HTMLElement.`, this.element);
+    }
     return this;
   }
 
   id(value: string | AnyFn) {
-    this.exec(this.element, HTMLElement, () => {
+    if (this.element instanceof HTMLElement) {
       try {
-        if (typeof value === 'function') {
-          this.element.id = value(this.element);
-        } else {
-          this.element.id = value;
-        }
+        this.element.id = this.#asValue(value);
       } catch (e) {
-        console.warn(`Could not set id to value '${value}'.\n`, e);
+        console.error(`Could not set id to value '${value}'.\n`, e);
       }
-    });
+    } else {
+      console.warn(`Not an HTMLElement.`, this.element);
+    }
     return this;
   }
 
   // Handle style as an attribute string or object
-  style(css: string | AnyObject) {
-    this.exec(this.element, HTMLElement, () => {
+  style(css: string | StyleObject) {
+    if (this.element instanceof HTMLElement) {
       try {
         if (typeof css === 'string') {
           this.element.setAttribute('style', css);
@@ -206,79 +238,72 @@ export class Yadel {
           }
         }
       } catch (e) {
-        console.warn(`Could not set element style.\n`, e);
+        console.error(`Could not set element style.\n`, e);
       }
-    });
+    } else {
+      console.warn(`Not an HTMLElement.`, this.element);
+    }
     return this;
   }
+  // alias to `css` instance method
+  css = this.style;
 
+  // Implementation example:
+  // on: [
+  //     ['click', clickHandler, { bubbles: true }],
+  //     { mouseover: hoverHandler, { bubbles: false } }
+  // ]
   on(listeners: EventList) {
-    this.exec(this.element, Element, () => {
-      try {
-        for (const listener of [].concat(listeners)) {
-          for (const [eventType, args] of Object.entries(listener)) {
-            this.element.addEventListener.apply(null, [].concat(eventType, [].concat(args)));
+    if (this.element instanceof Element) {
+      for (const listener of [].concat(listeners) as EventItem[]) {
+        try {
+          if (Array.isArray(listener)) {
+            this.element.addEventListener.call(this.element, ...listener);
+          } else {
+            for (const [eventType, args] of Object.entries(listener) as Array<[EventType, VoidFn | EventObject[]]>) {
+              this.element.addEventListener.apply(this.element, [].concat(eventType, args));
+            }
           }
-          // try {
-          //   // If there are only 2 arguments, `child` and `fn` will be equal
-          //   // since the default value for `fn` falls back to `child`...
-          //   // ...and if they *are* equal, reset `child` to '<'
-          //   // and if `child` happens to be falsey, reset to '<
-          //   const targetChild = child !== fn && typeof child === 'string';
-          //
-          //   this.element.addEventListener(eventType, (e) => {
-          //     let _target = e.target as Element;
-          //     let _currentTarget = e.currentTarget as Element;
-          //     // if we clicked on the thing
-          //     if (_target === _currentTarget) {
-          //       (fn as VoidFn)(e);
-          //     } else if (targetChild) {
-          //       while (_target !== _currentTarget) {
-          //         // fire callback if a parent element matches
-          //         if (_target.matches(String(child))) {
-          //           (fn as VoidFn)(e);
-          //           break;
-          //         }
-          //         // Is this just manual bubbling?
-          //         _target = _target.parentElement;
-          //       }
-          //     }
-          //   });
-          // } catch (e) {
-          //   console.warn(`Could not add '${eventType}' event.\n`, e);
-          // }
+        } catch (e) {
+          console.error(`Could not set event listener(s).\n`);
         }
-      } catch (e) {
-        console.warn(`Could not set event listener(s).\n`, e);
       }
-    });
+    } else {
+      console.warn(`Not an Element.\n`, this.element);
+    }
     return this;
   }
 
-  html(htm: string | undefined) {
-    if (typeof htm === 'string') {
-      this.element.innerHTML = htm;
+  html(htm: string | number | undefined | AnyFn) {
+    if (/string|number/.test(typeof htm)) {
+      this.element.innerHTML = String(htm);
       return this;
     }
     if (htm === undefined) {
       return this.element.outerHTML;
     }
+    // This supports passing a function for `htm` value
+    this.element.innerHTML = String(this.#asValue(htm));
+    return this;
   }
 
   // Shortcuts for common attributes
-  text(txt: string | undefined) {
-    if (typeof txt === 'string') {
-      this.element.textContent = txt;
+  text(txt: string | number | undefined | AnyFn) {
+    if (/string|number/.test(typeof txt)) {
+      (this.element || this.fragment).textContent = String(txt);
       return this;
     }
     if (txt === undefined) {
-      return this.element.textContent;
+      return (this.element || this.fragment).textContent;
     }
+    // This supports passing a function for `txt` value
+    (this.element || this.fragment).textContent = String(this.#asValue(txt));
+    return this;
   }
 
   // With great power comes great responsibility...
-  set innerHTML(htm: string) {
-    this.element.innerHTML = htm;
+  set innerHTML(htm: string | number) {
+    this.element.innerHTML = String(htm);
   }
   get innerHTML() {
     return this.element.innerHTML;
@@ -290,7 +315,7 @@ export class Yadel {
   }
 
   // INSERT >
-  insertElement(where: InsertLoc = INSERT.END, elem: Element | Yadel) {
+  insertElement(where: InsertLoc = END, elem: Element | Yadel) {
     const elementToInsert =
       elem instanceof Yadel
         ? elem.get()
@@ -301,66 +326,64 @@ export class Yadel {
     );
     return this;
   }
-  insertHTML(where: InsertLoc = INSERT.END, html) {
+  insertHTML(where: InsertLoc = END, html) {
     this.element.insertAdjacentHTML(
       where,
       html as string
     );
     return this;
   }
-  insertText(where: InsertLoc = INSERT.END, txt) {
-    this.element.insertAdjacentText(
-      where,
-      txt as string
-    );
+  insertText(where: InsertLoc = END, txt) {
+    if (this.fragment) {
+      if (where === BEGIN) {
+        this.fragment.textContent = txt + this.fragment.textContent;
+      } else {
+        this.fragment.textContent += txt;
+      }
+    } else {
+      this.element.insertAdjacentText(
+        where,
+        txt as string
+      );
+    }
     return this;
   }
   // < INSERT
 
   // APPEND >
   appendElement(elem: Element | Yadel) {
-    this.insertElement(INSERT.END, elem);
+    this.insertElement(END, elem);
     return this;
   }
   appendHTML(html: string) {
-    this.insertHTML(INSERT.END, html);
+    this.insertHTML(END, html);
     return this;
   }
   appendText(txt: string) {
-    this.insertText(INSERT.END, txt);
+    this.insertText(END, txt);
     return this;
   }
   // < APPEND
 
   // PREPEND >
   // prependElement(elem: Element) {
-  //   this.insertElement(INSERT.BEGIN, elem);
+  //   this.insertElement(BEGIN, elem);
   //   return this;
   // }
   prependHTML(html: string) {
-    this.insertHTML(INSERT.BEGIN, html);
+    this.insertHTML(BEGIN, html);
     return this;
   }
   // prependText(txt: string) {
-  //   this.insertText(INSERT.BEGIN, txt);
+  //   this.insertText(BEGIN, txt);
   //   return this;
   // }
   // < PREPEND
 
   appendChildren(children: Children, fn: AnyFn) {
     console.log('appendChildren');
-    if (/string|number/.test(typeof children)) {
-      const childrenString = String(children).trim();
-      if (regex_HTML_PREFIX.test(childrenString)) {
-        this.appendHTML(childrenString.replace(regex_HTML_PREFIX, '').trim());
-      } else {
-        this.appendText(childrenString);
-      }
-    } else if (children instanceof Yadel) {
-      this.appendElement(children.get());
-    } else if (children instanceof Element) {
-      this.appendElement(children);
-    } else if (Array.isArray(children)) {
+
+    if (Array.isArray(children)) {
       //
       // TODO:
       //  .......................................
@@ -368,7 +391,30 @@ export class Yadel {
       //  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       //
       this.appendElement(fn(...children).get());
+      return this;
     }
+
+    if (/string|number/.test(typeof children)) {
+      const childrenString = String(children);
+      if (regex_HTML_PREFIX.test(childrenString)) {
+        this.appendHTML(childrenString.replace(regex_HTML_PREFIX, ''));
+      } else {
+        this.appendText(childrenString);
+      }
+      return this;
+    }
+
+    if (children instanceof Element) {
+      this.appendElement(children);
+      return this;
+    }
+
+    if (children instanceof Yadel) {
+      this.appendElement(children.get());
+      return this;
+    }
+
+    return this;
   }
   append = this.appendChildren;
 
@@ -457,10 +503,10 @@ export class Yadel {
  */
 export function ya(...args: YadelArgs) {
   let [
-    tag = YADEL_TAG,
+    tag = YADEL_TAG as TagArg,
     opts = {},
     children = null
-  ] = [].concat(args);
+  ] = args;
 
   if (children == null && Array.isArray(opts)) {
     children = opts;
@@ -471,9 +517,9 @@ export function ya(...args: YadelArgs) {
   const yadel = new Yadel(tag);
 
   // iterate `opts` to do things
-  for (const [method, value] of Object.entries(opts)) {
+  for (const [method, ...args] of Object.entries(opts)) {
     if (method in yadel) {
-      yadel[method].apply(yadel, [].concat(value));
+      yadel[method](...args);
     }
   }
 
@@ -489,7 +535,7 @@ export function ya(...args: YadelArgs) {
 ya.render = Yadel.render;
 
 // Export all tags as individual functions???
-export const yaTags = [].concat(tags, voidTags).reduce((fns, tag) => {
+ya.tags = [].concat(tags, voidTags).reduce((fns, tag) => {
   fns[tag] = (...args) => ya(tag, ...args);
   return fns;
 }, {});

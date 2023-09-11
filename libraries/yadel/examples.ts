@@ -1,21 +1,21 @@
 import { elementEvents } from './src/tagList';
-import ya, { HTML_PREFIX } from './src/yadel';
+import ya, { ___HTML } from './src/yadel';
 
-const { p, b, a, textarea, button } = ya.tags;
+const { p, b, a, textarea } = ya.tags;
 
 function asHTML(str) {
-  return HTML_PREFIX + String(str).trim();
+  return ___HTML + String(str).trim();
 }
 
 p([
-  HTML_PREFIX + 'This is some HTML shit right here.'
+  ___HTML + 'This is some HTML shit right here.'
 ]).appendTo(document.body);
 
 console.log(
   p({ title: 'Bogus' }, [
     b(['Yo.']),
     asHTML('<!-- nothing -->'),
-    `${HTML_PREFIX} ${a({ href: '/bogus' }, [`It's bogus.`]).html()}`,
+    `${___HTML} ${a({ href: '/bogus' }, [`It's bogus.`]).html()}`,
     ' ',
     ['i', {}, ['Totally!']]
   ]).html()

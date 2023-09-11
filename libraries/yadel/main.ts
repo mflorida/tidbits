@@ -1,1 +1,2 @@
-export * as yadel from './src/yadel';
+export * from './src/yadel';
+export { default } from './src/yadel';

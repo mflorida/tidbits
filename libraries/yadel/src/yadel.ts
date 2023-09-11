@@ -1,12 +1,11 @@
 // Yet Another DOM Element Library
 import type { AnyFn, AnyObject, Appendable, VoidFn } from './utils';
-import { appendable, removeChildren } from './utils';
+import { removeChildren } from './utils';
 import type { Tag, VoidTag } from './tags';
 import { eventTypes, tags, voidTags } from './tagList';
 
 type YadelChildren =
   | Element
-  | HTMLElement
   | DocumentFragment
   | string
   | number
@@ -53,6 +52,16 @@ type EventItem = [
 ] | EventObject;
 
 type EventList = Array<EventItem>;
+
+function appendable(it: YadelChildren | unknown): boolean {
+  return (''
+    || typeof it === 'string'
+    || typeof it === 'number'// Not sure if .append() can handle numbers
+    || it instanceof Element
+    || it instanceof DocumentFragment
+    || it instanceof Node
+  );
+}
 
 export const ___HTML = '___HTML';
 export const ___FRAG = '<>';
@@ -149,24 +158,38 @@ export class Yadel {
 
   static create(...args: YadelArgs) {
     let [
-      tag = YADEL_TAG,
+      tag = YADEL_TAG as TagArg,
       opts = {},
       children = null
-    ] = [].concat(args);
+    ] = args;
 
     // Create Yadel instance
     const yadel = new Yadel(tag);
 
     // Handle passing only two arguments (tag, appendable)
     if (children == null && (Array.isArray(opts) || appendable(opts))) {
-      children = opts;
+      children = opts as YadelChildren;
       opts = {};
     }
 
     // iterate `opts` to do things
-    for (const [method, value] of Object.entries(opts)) {
+    for (let [method, ...args] of Object.entries(opts)) {
+      // Handle $attr shortcut
+      if (method.startsWith('$')) {
+        yadel.attr({
+          [method.slice(1)]: args
+        });
+        continue;
+      }
+      // Handle _prop shortcut
+      if (method.startsWith('_')) {
+        yadel.prop({
+          [method.slice(1)]: args
+        });
+        continue;
+      }
       if (method in yadel) {
-        yadel[method].apply(yadel, [].concat(value));
+        yadel[method](...args);
       }
     }
 
@@ -197,10 +220,8 @@ export class Yadel {
     } else {
       console.warn(
         'Could not call on instance' +
-        what.name
-          ? ' of ' + what.name
-          : '' +
-          '.'
+        (what.name ? ' of ' + what.name : '') +
+        '.'
       );
       return false;
     }
@@ -504,16 +525,6 @@ export class Yadel {
     return this;
   }
 
-  render(parent: string | Element) {
-    this.parent =
-      typeof parent === 'string'
-        ? document.querySelector(parent)
-        : parent;
-    this.parent.innerHTML = '';
-    this.parent.appendChild(this.element);
-    return this;
-  }
-
   /**
    * Static method for rendering Yadel elements to the DOM
    * @param {Yadel|Appendable} toRender - item to add to the DOM
@@ -539,6 +550,11 @@ export class Yadel {
       return;
     }
   };
+
+  render(parent: string | Element) {
+    Yadel.render(this.fragment || this.element, parent);
+    return this;
+  }
 
   get() {
     return this.element;
@@ -583,34 +599,34 @@ export class Yadel {
  * @param args
  */
 export function ya(...args: YadelArgs) {
-  // return Yadel.create(...args);
-  let [
-    tag = YADEL_TAG as TagArg,
-    opts = {},
-    children = null
-  ] = args;
-
-  if (children == null && Array.isArray(opts)) {
-    children = opts;
-    opts = {};
-  }
-
-  // Create Yadel instance
-  const yadel = new Yadel(tag);
-
-  // iterate `opts` to do things
-  for (const [method, ...args] of Object.entries(opts)) {
-    if (method in yadel) {
-      yadel[method](...args);
-    }
-  }
-
-  // Deal with the children!
-  for (const child of [].concat(children)) {
-    yadel.appendChildren(child, ya);
-  }
-
-  return yadel;
+  return Yadel.create(...args);
+  // let [
+  //   tag = YADEL_TAG as TagArg,
+  //   opts = {},
+  //   children = null
+  // ] = args;
+  //
+  // // Create Yadel instance
+  // const yadel = new Yadel(tag);
+  //
+  // if (children == null && Array.isArray(opts)) {
+  //   children = opts;
+  //   opts = {};
+  // }
+  //
+  // // iterate `opts` to do things
+  // for (const [method, args] of Object.entries(opts)) {
+  //   if (method in yadel) {
+  //     yadel[method](...args);
+  //   }
+  // }
+  //
+  // // Deal with the children!
+  // for (const child of [].concat(children)) {
+  //   yadel.appendChildren(child, ya);
+  // }
+  //
+  // return yadel;
 }
 
 // Alias

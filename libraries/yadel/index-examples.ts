@@ -1,20 +1,18 @@
 import ya, {
-  yaTags,
-  yadelTags,
   ___FRAG,
   ___HTML,
-  asHtml,
-  elementEvents
+  asHtml
 } from './main';
+import { eventsByTag } from './src/eventsByTag.js'
 
-const { p, b, a } = yadelTags;
-const { div, textarea } = yaTags;
+const { p, b, a } = ya.tags;
+const { div, textarea } = ya.tags;
 
 console.log('p()', p());
 console.log('b()', b());
 console.log('a()', a());
 console.log('div()', div());
-console.log('yaTags.i()', yaTags.i());
+console.log('ya.tags.i()', ya.tags.i());
 
 const app_ = document.getElementById('app');
 
@@ -31,11 +29,11 @@ p(___HTML + 'This is some HTML shit right here.')
   .appendTo(container_.get());
 
 console.log(
-  p({ title: 'Bogus' }, [
+  p({ $title: 'Bogus' }, [
     b('Yo.'),
     ' ',
     asHtml('<!-- nothing -->'),
-    ___HTML + `${a({ href: '/bogus' }, [`It's bogus.`]).html()}`,
+    ___HTML + `${a({ $href: '/bogus' }, [`It's bogus.`]).html()}`,
     ' ',
     ['i', {}, ['Totally!']]
   ]).appendTo(container_.get()).html()
@@ -68,7 +66,7 @@ const eventMapOutput = textarea().attr({
 }).style({
   width: '100%'
 }).prop({
-  value: JSON.stringify(elementEvents(), null, 2)
+  value: JSON.stringify(eventsByTag, null, 2)
 });
 
 div_.appendElement(
@@ -117,7 +115,7 @@ ya('p', [
     // }]
   }, [
     ['b', {
-      // on: [['click', (e) => console.log(e.target.tagName) ]]
+      on: [['click', (e) => console.log(e.target.tagName) ]]
     }, [
       'A thing to click.'
     ]]

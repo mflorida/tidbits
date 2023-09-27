@@ -2,8 +2,8 @@
 // Answering the age-old question of "Which kind of JavaScript loop is fastest?"
 // -------------------------------------------------------------------------------------------------------
 // TL;DR: It doesn't matter these days - they're all pretty much the same (but `while` is fastest 😎)
-// RANT: STOP USING `for (let i = 0; i < xxx.length; i++)` WHO CAN READ THAT??? I'M NOT A COMPUTER!
-// How about...  `while (++i < len)`???  (after assigning `i` and `len`...)
+// RANT: STOP USING `for (let i = 0; i < arr.length; i++)` WHO CAN READ THAT??? I'M NOT A COMPUTER!
+// How about...  `while (++i < len)`???  (after assigning `i = -1` and `len = arr.length`...)
 // -------------------------------------------------------------------------------------------------------
 // Original reference:
 // https://blog.bitsrc.io/measuring-performance-of-different-javascript-loop-types-c0e9b1d193ed

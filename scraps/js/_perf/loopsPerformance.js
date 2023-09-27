@@ -1,14 +1,14 @@
 // -------------------------------------------------------------------------------------------------------
 // Answering the age-old question of "Which kind of JavaScript loop is fastest?"
 // -------------------------------------------------------------------------------------------------------
+// TL;DR: It doesn't matter these days - they're all pretty much the same (but `while` is fastest 😎)
+// RANT: STOP USING `for (let i = 0; i < xxx.length; i++)` WHO CAN READ THAT??? I'M NOT A COMPUTER!
+// How about...  `while (++i < len)`???  (after assigning `i` and `len`...)
+// -------------------------------------------------------------------------------------------------------
 // Original reference:
 // https://blog.bitsrc.io/measuring-performance-of-different-javascript-loop-types-c0e9b1d193ed
 // NOTE: The Firefox results in the link above are very slow because of a small bug in the example code...
 // ...Firefox is just as fast as Chrome after the bug fix (adding 'let' to the variable declaratons) 🙄
-// -------------------------------------------------------------------------------------------------------
-// TL;DR: It doesn't matter these days - they're all pretty much the same (but `while` is fastest 😎)
-// RANT: STOP USING `for (let i = 0; i < xxx.length; i++)` WHO CAN READ THAT??? I'M NOT A COMPUTER!
-// How about... (after assigning `i` and `len`...) `while (++i < len)`???
 // -------------------------------------------------------------------------------------------------------
 let filler;
 

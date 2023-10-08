@@ -1,6 +1,6 @@
 import ya, {
   ___FRAG,
-  ___HTML,
+  ___HTML___,
   asHtml
 } from './main';
 import { eventsByTag } from './src/eventsByTag.js'
@@ -24,7 +24,7 @@ const container_ = div({
   }
 }).appendTo(app_);
 
-p(___HTML + 'This is some HTML shit right here.')
+p(___HTML___ + 'This is some HTML shit right here.')
   .append(p(___FRAG + 'This is a fragment inside of a <p>?').get())
   .appendTo(container_.get());
 
@@ -33,7 +33,7 @@ console.log(
     b('Yo.'),
     ' ',
     asHtml('<!-- nothing -->'),
-    ___HTML + `${a({ $href: '/bogus' }, [`It's bogus.`]).html()}`,
+    ___HTML___ + `${a({ $href: '/bogus' }, [`It's bogus.`]).html()}`,
     ' ',
     ['i', {}, ['Totally!']]
   ]).appendTo(container_.get()).html()

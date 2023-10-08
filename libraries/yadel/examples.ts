@@ -1,21 +1,21 @@
 import { elementEvents } from './src/tagList';
-import ya, { ___HTML } from './src/yadel';
+import ya, { ___HTML___ } from './src/yadel';
 
 const { p, b, a, textarea } = ya.tags;
 
 function asHTML(str) {
-  return ___HTML + String(str).trim();
+  return ___HTML___ + String(str).trim();
 }
 
 p([
-  ___HTML + 'This is some HTML shit right here.'
+  ___HTML___ + 'This is some HTML shit right here.'
 ]).appendTo(document.body);
 
 console.log(
   p({ title: 'Bogus' }, [
     b(['Yo.']),
     asHTML('<!-- nothing -->'),
-    `${___HTML} ${a({ href: '/bogus' }, [`It's bogus.`]).html()}`,
+    `${___HTML___} ${a({ href: '/bogus' }, [`It's bogus.`]).html()}`,
     ' ',
     ['i', {}, ['Totally!']]
   ]).html()

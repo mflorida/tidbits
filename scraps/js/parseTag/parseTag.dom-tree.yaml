@@ -23,13 +23,13 @@
 
   # Fragments could be used by another module, but cannot be processed by `parseTag()`.
   # The fragment components are included as an example.
-  # In this example, `<>`, `</>` and `___` (triple underscore) indicate a fragment
+  # In this example, `<>`, and `___` (triple underscore) indicate a fragment
   - <>:
       - p#fragments:
           - ___: Document fragments inside of a paragraph...
-          - ___HTML: <br>
+          - ___HTML___: <br>
           - ___: ...inside of other document fragments.
       - p#more-fragments:
           - <>: Two more fragments inside of a paragraph...
-          - ___HTML: <br>
-          - </>: ...inside of other document fragments.
+          - ___HTML___: <br>
+          - <>: ...inside of other document fragments.

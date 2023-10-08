@@ -63,14 +63,14 @@ function appendable(it: YadelChildren | unknown): boolean {
   );
 }
 
-export const ___HTML = '___HTML';
+ export const ___HTML___ = '___HTML___';
 export const ___FRAG = '<>';
 
-const regex___HTML = new RegExp(`^${___HTML}`);
+const regex___HTML = new RegExp(`^${___HTML___}`);
 const regex___FRAG = new RegExp(`^(${___FRAG}|</>)`);
 
 export const asHtml = (str) => (
-  ___HTML + str.replace(regex___HTML, '')
+  ___HTML___ + str.replace(regex___HTML, '')
 );
 
 export const asFragment = (str) => (
@@ -344,7 +344,7 @@ export class Yadel {
     return this;
   }
 
-  [___HTML](htm: string | number | undefined | AnyFn) {
+  [___HTML___](htm: string | number | undefined | AnyFn) {
     if (/string|number/.test(typeof htm)) {
       this.element.innerHTML = String(htm);
       return this;
@@ -356,7 +356,7 @@ export class Yadel {
     this.element.innerHTML = String(this.#asValue(htm));
     return this;
   }
-  html = this[___HTML];
+  html = this[___HTML___];
 
   [___FRAG](frag: string | Node) {
     try {

@@ -18,7 +18,15 @@ function fakeReactCreateElement(tag, props, children) {
 }
 
 {
-  const [tag, attr] = parseTag('div#foo.bar?baz|title="Some Div"|data-id=102938|style="width:80%;margin:0 auto;display:flex;justify-content:center;');
+  const styleString = `width:80%;margin:0 auto;display:flex;justify-content:center;`;
+  const tagString = [
+    'div#foo.bar?baz',
+    'title="Some Div"',
+    'data-id=102938',
+    `style=${styleString}`
+  ].join('|');
+
+  const [tag, attr] = parseTag(tagString);
   console.log(tag, attr);
   console.log(fakeReactCreateElement(
     tag,

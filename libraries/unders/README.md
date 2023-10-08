@@ -11,7 +11,7 @@ import ___, {
   isEmpty, 
   queryAll, 
   querySelector,
-  ___HTML
+  ___HTML___
 } from 'unders';
 
 // ___.* are static methods of 'unders'
@@ -47,7 +47,7 @@ const ___div = ___elem('div.foo.bar.baz', {
     ['mouseover', (e) => console.log(`Hovering ${e.target.tagName}.`)]
   ],
 }, [
-  ___HTML + '<b>DANGEROUSLY INSERT HTML</b>',
+  ___HTML___ + '<b>DANGEROUSLY INSERT HTML</b>',
   ['p.child1', 'First child.'],
   ['p.child2', [
     'Text for child2, part 1.',
